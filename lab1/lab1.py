@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from threading import Thread
+from time import process_time
 from kMeans import kMeans
 
 def main():
@@ -8,30 +9,47 @@ def main():
 	def onlyDigits(char):
 		return char >= "0" and char <= "9"
 
+	def startupUI():
+		canvasMain.delete("all")
+		labelProcessing = tk.Label(root, text='processing..')
+		labelProcessing.place(x = 550, y = 30)
+		btnProcess["state"] = "disabled"
+		return labelProcessing
+
+	def finalizeUI(labelProcessing):
+		labelProcessing.destroy()
+		btnProcess["state"] = "normal"
+
 	def startupRecognition():
 		imageAmount = int(imageAmountEntry.get())
 		classAmount = int(classAmountEntry.get())
 		if not (1000 <= imageAmount <= 100000) or not (2 <= classAmount <= 20):
 			return
 
-		workerThread = Thread(target=recognition, args=(imageAmount, classAmount, canvasMain))
+		labelProcessing = startupUI()
+
+		workObject = kMeans(imageAmount, classAmount, canvasMain.winfo_width(), canvasMain.winfo_height())
+		workObject.generateData()
+		workObject.recognize()
+
+		workerThread = Thread(target=coresRecount, args=(workObject, canvasMain, labelProcessing))
 		workerThread.start()
 
 		return
 
-	def recognition(imageAmount, classAmount, canvasMain):
-		workObject = kMeans(imageAmount, classAmount, canvasMain.winfo_width(), canvasMain.winfo_height())
-		workObject.generateData()
-		workObject.recognize()
+	def coresRecount(workObject, canvasMain, labelProcessing):
 		workObject.viewData(canvasMain)
 
+		t0 = process_time()
 		cycles = 0
 		while (workObject.refindAllCores()):
 			workObject.recognize()
-			workObject.viewData(canvasMain)
 			cycles += 1
-
+		print(process_time() - t0)
 		print(cycles)
+
+		workObject.viewData(canvasMain)
+		finalizeUI(labelProcessing)
 		return
 
 	root = tk.Tk()

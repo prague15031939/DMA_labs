@@ -25,7 +25,7 @@ class kMeans:
         sameCoresAmount = 0
         for i in range(len(self.classCores)):
             newCore = self.__refindCore(i)
-            if ((abs(newCore[0] - self.classCores[i][0]) <= 2) and (abs(newCore[1] - self.classCores[i][1]) <= 2)):
+            if ((abs(newCore[0] - self.classCores[i][0]) <= 5) and (abs(newCore[1] - self.classCores[i][1]) <= 5)):
                 sameCoresAmount += 1
             self.classCores[i] = newCore
 
@@ -44,12 +44,8 @@ class kMeans:
         return sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
     def __findClosestCore(self, point):
-        minDist = 10**10
-        for classCore in self.classCores:
-            curDist = self.__findDist(point, classCore)
-            if curDist < minDist:
-                minDist = curDist
-                point[2] = self.classCores.index(classCore)
+        distances = [self.__findDist(point, classCore) for classCore in self.classCores]
+        point[2] = distances.index(min(distances))
 
     def viewData(self, canvas):
         canvas.delete("all")
