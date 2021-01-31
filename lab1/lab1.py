@@ -9,14 +9,14 @@ def main():
 	def onlyDigits(char):
 		return char >= "0" and char <= "9"
 
-	def startupUI():
+	def startupUI(btnProcess):
 		canvasMain.delete("all")
 		labelProcessing = tk.Label(root, text='processing..')
 		labelProcessing.place(x = 550, y = 30)
 		btnProcess["state"] = "disabled"
 		return labelProcessing
 
-	def finalizeUI(labelProcessing):
+	def finalizeUI(labelProcessing, btnProcess):
 		labelProcessing.destroy()
 		btnProcess["state"] = "normal"
 
@@ -26,18 +26,19 @@ def main():
 		if not (1000 <= imageAmount <= 100000) or not (2 <= classAmount <= 20):
 			return
 
-		labelProcessing = startupUI()
+		labelProcessing = startupUI(btnProcess)
 
 		workObject = kMeans(imageAmount, classAmount, canvasMain.winfo_width(), canvasMain.winfo_height())
 		workObject.generateData()
 		workObject.recognize()
 
-		workerThread = Thread(target=coresRecount, args=(workObject, canvasMain, labelProcessing))
+		workerThread = Thread(target=coresRecount, args=(workObject, canvasMain, labelProcessing, btnProcess))
+		workerThread.daemon = True
 		workerThread.start()
 
 		return
 
-	def coresRecount(workObject, canvasMain, labelProcessing):
+	def coresRecount(workObject, canvasMain, labelProcessing, btnProcess):
 		workObject.viewData(canvasMain)
 
 		t0 = process_time()
@@ -49,13 +50,12 @@ def main():
 		print(cycles)
 
 		workObject.viewData(canvasMain)
-		finalizeUI(labelProcessing)
+		finalizeUI(labelProcessing, btnProcess)
 		return
 
 	root = tk.Tk()
 	root.title("k-means")
 	root.geometry("700x650+300+100")
-	#root.resizable(False, False)
 
 	labelImageAmount = tk.Label(root, text='image amount:')
 	labelImageAmount.place(x = 10, y = 5)
