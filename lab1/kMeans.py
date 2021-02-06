@@ -62,4 +62,7 @@ class kMeans:
             vector = tpl[1]
             pointColor = self.__coreColores[vector[2]]
             if (coef == -1) or (coef != -1) and (tpl[0] % coef != 0):
-                canvas.create_oval(vector[0] - 1, vector[1] - 1, vector[0] + 1, vector[1] + 1, fill=pointColor, outline="")
+                canvas.create_oval(vector[0] - 2, vector[1] - 2, vector[0] + 2, vector[1] + 2, fill=pointColor, outline="")
+
+        for vector in self.classCores:
+            canvas.create_oval(vector[0] - 3, vector[1] - 3, vector[0] + 3, vector[1] + 3, fill="#000000", outline="")
