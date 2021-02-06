@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 from threading import Thread
+import os
 from maximine import maximine
+from maximineImageCreator import maximineImageCreator
 
 def main():
 
@@ -19,27 +21,43 @@ def main():
 		labelProcessing.destroy()
 		btnProcess["state"] = "normal"
 
+	def cleanImageDirectory(path):
+		for filename in os.listdir(path):
+			filepath = path + filename
+			if os.path.isfile(filepath) or os.path.islink(filepath):
+				os.unlink(filepath)
+
 	def startupRecognition():
 		imageAmount = int(imageAmountEntry.get())
-		if not (1000 <= imageAmount <= 100000):
+		if not (1000 <= imageAmount <= 20000):
 			return
 
 		labelProcessing = startupUI(btnProcess)
+		cleanImageDirectory("./images/")
+		workerThread = Thread(target=recognition, args=(imageAmount, canvasMain, labelProcessing, btnProcess, "./images/"))
+		workerThread.daemon = True
+		workerThread.start()
+
+		return
+
+	def recognition(imageAmount, canvasMain, labelProcessing, btnProcess, imageStoringDirectory):
+		imgCreator = maximineImageCreator(canvasMain.winfo_width(), canvasMain.winfo_height(), imageStoringDirectory)
 
 		workObject = maximine(imageAmount, canvasMain.winfo_width(), canvasMain.winfo_height())
 		workObject.generateData()
 
 		while True:
 			workObject.splitByClasses()
+
+			imgCreator.createNew(workObject.imageList, workObject.classCores)
+
 			workObject.optimizeCores()
 			core, dist = workObject.findPotentialCore()
 			if not workObject.createNewCore(core, dist):
 				break
 
 		workObject.viewData(canvasMain)
-
 		finalizeUI(labelProcessing, btnProcess)
-
 		return
 
 	root = tk.Tk()
