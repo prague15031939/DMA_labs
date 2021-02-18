@@ -41,3 +41,24 @@ class BayesDivision:
             self.ordinatsList2.append(p2 * self.pc2 * self.__scale)
 
         return [i for i in range(self.width)], self.ordinatsList1, [i for i in range(self.width)], self.ordinatsList2
+
+    def findErrorValues(self, mu1, mu2, sigma1, sigma2):
+        p1 = 1; p2 = 0; x = -self.__offset; eps = 0.01
+        falseAlarmError = 0
+        missingDetectingError = 0
+
+        while (p2 < p1):
+            p1 = self.pc1 * exp(-0.5 * ((x - mu1) / sigma1) ** 2) / (sigma1 * sqrt(2 * pi))
+            p2 = self.pc2 * exp(-0.5 * ((x - mu2) / sigma2) ** 2) / (sigma2 * sqrt(2 * pi))
+            falseAlarmError += p2 * eps
+            x += eps
+
+        border = x
+
+        while (x < self.width + 100):
+            p1 = exp(-0.5 * ((x - mu1) / sigma1) ** 2) / (sigma1 * sqrt(2 * pi))
+            p2 = exp(-0.5 * ((x - mu2) / sigma2) ** 2) / (sigma2 * sqrt(2 * pi))
+            missingDetectingError += p1 * self.pc1 * eps
+            x += eps
+
+        return falseAlarmError / self.pc1, missingDetectingError / self.pc1, border
