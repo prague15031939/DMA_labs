@@ -4,9 +4,13 @@ def main():
 	cls = int(input("class amount: "))
 	objPerCls = int(input("object per class: "))
 	attrPerObj = int(input("attribute per object: "))
+
 	workObject = Perceptron()
-	workObject.generateData(cls, objPerCls, attrPerObj)
-	workObject.findDecisionFunctions()
+	while True:
+		workObject.generateData(cls, objPerCls, attrPerObj)
+		if workObject.findDecisionFunctions():
+			break
+
 	workObject.printClasses()
 	workObject.printDecisionFunctions("funcs")
 
