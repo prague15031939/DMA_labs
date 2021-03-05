@@ -18,10 +18,13 @@ class Perceptron:
     def findDecisionFunctions(self):
         isClassification = True; i = 0
         while isClassification and (i < 1000):
-            i += 1
+            i += 1; corrected = 0
             for cls in enumerate(self.classes):
                 for obj in cls[1]:
-                    isClassification = self.__correctWeight(obj, self.weights[cls[0]], cls[0])
+                    if self.__correctWeight(obj, self.weights[cls[0]], cls[0]):
+                        corrected += 1
+            if (corrected == len(self.classes) * len(self.classes[0])):
+                isClassification = False
 
         return i < 1000
 
@@ -51,7 +54,6 @@ class Perceptron:
     def findObjectClass(self, obj):
         obj.append(1)
         results = [self.__multiplyVectors(w, obj) for w in self.weights]
-        print(results)
         return results.index(max(results)) + 1
 
     def printClasses(self):
