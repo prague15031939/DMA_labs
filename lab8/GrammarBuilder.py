@@ -14,7 +14,7 @@ class GrammarBuilder:
         self.productions = []
 
     def entryPoint(self):
-        self.__sortChains(self.defaultChainList)
+        self.defaultChainList.sort(key=len, reverse=True)
         nonTerminalIndex = 0
         for chain in self.defaultChainList:
             nonTerminal = "S"
@@ -27,18 +27,27 @@ class GrammarBuilder:
                     isRemainder = True
 
                 production = [nonTerminal, terminal, self.nonTerminals[nonTerminalIndex]]
-                if not (production in self.productions):
+                nextNonTerminal = self.__getProductionNextNonTerminal(production)
+                if (nextNonTerminal == None) or (len(chain) == self.maxChainLength):
+                    if not isRemainder:
+                        nonTerminal = self.nonTerminals[nonTerminalIndex]
+                        nonTerminalIndex += 1
+                    else:
+                        production[2] = ""
                     self.productions.append(production)
-                    nonTerminal = self.nonTerminals[nonTerminalIndex]
-                    nonTerminalIndex += 1
+                else:
+                    nonTerminal = nextNonTerminal
 
                 if isRemainder:
                     break
 
         self.viewProductions()
 
-    def __sortChains(self, chains):
-        chains.sort(key=len, reverse=True)
+    def __getProductionNextNonTerminal(self, production):
+        for item in self.productions:
+            if (production[0] == item[0]) and (production[1] == item[1]):
+                return item[2]
+        return None
 
     def viewProductions(self):
         for production in self.productions:
